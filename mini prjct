@@ -1,0 +1,145 @@
+import calendar
+
+def add_event(year, month):
+    while True:
+        date = input("Enter event date: ")
+        event = input("Enter event description: ")
+
+        with open('events', 'a') as f:
+            f.write(event + " - " + date + " / " + str(month) + " / " + str(year) + "\n")
+
+        another_event = input("Do you want to add another event in the same month? (yes/no): ").strip().lower()
+        if another_event != 'yes':
+            display_menu(year, month)
+            break
+
+def view_events(year, month):
+    try:
+        with open('events', 'r') as f:
+            events = f.readlines()
+            if events:
+                print("Events for", calendar.month_name[month], year, ":")
+                found = False
+                for event in events:
+                    if f" / {month} / {year}" in event:
+                        print(event.strip())
+                        found = True
+                if not found:
+                    print("No events found for this month.")
+            else:
+                print("No events found.")
+    except FileNotFoundError:
+        print("No events found.")
+    finally:
+        display_menu(year, month)
+
+def remove_event(year, month):
+    while True:
+        date = input("Enter event date: ")
+        event = input("Enter event description: ")
+        try:
+            with open('events', 'r') as f:
+                lines = f.readlines()
+            with open('events', 'w') as f:
+                removed = False
+                for line in lines:
+                    if date in line and event in line:
+                        removed = True
+                    else:
+                        f.write(line)
+                if removed:
+                    print("Event removed successfully.")
+                else:
+                    print("Event not found.")
+        except FileNotFoundError:
+            print("Events file not found.")
+        except Exception as e:
+            print("An error occurred:", e)
+
+        another_event = input("Do you want to remove another event in the same month? (yes/no): ").strip().lower()
+        if another_event != 'yes':
+            display_menu(year, month)
+            break
+
+def edit_event(year, month):
+    while True:
+        date = input("Enter event date (DD) to edit: ")
+        event_to_edit = input("Enter event description to edit: ")
+        new_event = input("Enter new event description: ")
+        try:
+            with open('events', 'r') as f:
+                lines = f.readlines()
+            with open('events', 'w') as f:
+                edited = False
+                for line in lines:
+                    if date in line and event_to_edit in line:
+                        f.write(new_event + " - " + date + " / " + str(month) + " / " + str(year) + "\n")
+                        edited = True
+                    else:
+                        f.write(line)
+                if edited:
+                    print("Event edited successfully.")
+                else:
+                    print("Event not found for editing.")
+        except FileNotFoundError:
+            print("Events file not found.")
+        except Exception as e:
+            print("An error occurred while editing event:", e)
+
+        another_edit = input("Do you want to edit another event in the same month? (yes/no): ").strip().lower()
+        if another_edit != 'yes':
+            display_menu(year, month)
+            break
+
+
+def display_menu(year, month):
+    print("\nEvent Management:")
+    print("1. Add Event")
+    print("2. View Events")
+    print("3. Remove Event")
+    print("4. Edit Event")
+    print("5. Go Back")
+    choice = input("Enter your choice: ")
+    if choice == '1':
+        add_event(year, month)
+
+    elif choice == '2':
+        view_events(year, month)
+
+    elif choice == '3':
+        remove_event(year, month)
+    elif choice == '4':
+        edit_event(year, month)
+    elif choice == '5':
+        return
+    else:
+        print("Invalid choice. Please try again.")
+def get_month_number(month_name):
+    try:
+        month_number = list(calendar.month_name).index(month_name.capitalize())
+        return month_number
+    except ValueError:
+        return None
+
+def main():
+    while True:
+        year = int(input("Enter the year: "))
+        while True:
+            month_name = input("Enter the month (e.g., January): ").capitalize()
+            month = get_month_number(month_name)
+            if month:
+                break
+            else:
+                print("Invalid month name. Please try again.")
+
+        print(calendar.month(year, month))
+        display_menu(year, month)
+
+        continue_choice = input("Do you want to view another month? (yes/no): ").strip().lower()
+        if continue_choice != 'yes':
+            print("Goodbye!")
+            break
+
+
+main()
+
